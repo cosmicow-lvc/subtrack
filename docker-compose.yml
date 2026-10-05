@@ -9,7 +9,7 @@ services:
     env_file:
       - .env
     environment:
-      POSTGRES_HOST: user
+      POSTGRES_HOST: db
       POSTGRES_PORT: "5432"
     depends_on:
       db:
