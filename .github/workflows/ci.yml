@@ -37,5 +37,14 @@ jobs:
       - name: Lint
         run: python -m ruff check app tests
 
-      - name: Ejecutar pruebas
-        run: python -m pytest tests -v
+      - name: Ejecutar pruebas con cobertura
+        run: |
+          python -m pytest tests -v --cov=app --cov-report=term-missing --cov-report=xml
+
+      - name: Subir artefacto de cobertura
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml
+          if-no-files-found: error
