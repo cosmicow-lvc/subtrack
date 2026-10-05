@@ -2,7 +2,7 @@ from datetime import date
 from decimal import Decimal
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, Date, ForeignKey, Numeric, String
+from sqlalchemy import Boolean, Date, ForeignKey, Numeric, String, true
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin
@@ -23,6 +23,9 @@ class Sub(TimestampMixin, Base):
 	category: Mapped[str] = mapped_column(String(100))
 	billing_date: Mapped[date] = mapped_column(Date)
 	is_variable: Mapped[bool] = mapped_column(Boolean, default=False)
+	is_active: Mapped[bool] = mapped_column(
+		Boolean, default=True, server_default=true(), nullable=False
+	)
 
 	user: Mapped["User"] = relationship(back_populates="subscriptions")
 	charges: Mapped[list["Charge"]] = relationship(back_populates="subscription")

@@ -1,3 +1,5 @@
+from datetime import date
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -10,6 +12,12 @@ class SubscriptionNotFoundError(Exception):
     """La suscripción no existe o no pertenece al usuario."""
 
 
+def _six_month_window_start(today: date) -> date:
+    """Devuelve el primer día del mes, contando este y los cinco anteriores."""
+    month_index = today.year * 12 + today.month - 1 - 5
+    return date(month_index // 12, month_index % 12 + 1, 1)
+
+
 async def create_charge(
     session: AsyncSession, user_id: int, charge_data: ChargeCreate
 ) -> Charge:
@@ -18,6 +26,7 @@ async def create_charge(
         select(Sub.id).where(
             Sub.id == charge_data.sub_id,
             Sub.user_id == user_id,
+            Sub.is_active.is_(True),
         )
     )
     if subscription_id is None:
@@ -38,10 +47,15 @@ async def list_charges(
     session: AsyncSession, user_id: int, limit: int, offset: int
 ) -> list[Charge]:
     """Lista cargos de suscripciones del usuario, del más reciente al más antiguo."""
+    today = date.today()
     result = await session.scalars(
         select(Charge)
         .join(Charge.subscription)
-        .where(Sub.user_id == user_id)
+        .where(
+            Sub.user_id == user_id,
+            Charge.charged_at >= _six_month_window_start(today),
+            Charge.charged_at <= today,
+        )
         .order_by(Charge.charged_at.desc(), Charge.id.desc())
         .limit(limit)
         .offset(offset)
