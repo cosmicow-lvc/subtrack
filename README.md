@@ -27,7 +27,6 @@ La aplicación incluye data de demo para arrancar rápidamente en entorno local 
 - bcrypt
 - pytest + pytest-asyncio
 - Docker / Docker Compose
-```
 
 ## Requisitos
 
